@@ -1,4 +1,5 @@
 Features
+
 🎯 Personalized Study Methods
 - Implemented user-focused features, such as customizable Pomodoro timers and digital flashcards, to support diverse learning preferences.
 
