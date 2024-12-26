@@ -3,8 +3,8 @@ from time import sleep
 from math import cos, sin, pi, radians
 from sys import implementation
 from framebuf import FrameBuffer, RGB565  # type: ignore
-from time import sleep
-from machine import Pin, SPI
+from machine import Pin, SPI, Timer
+import utime
 
 def color565(r, g, b):
     """Return RGB565 color value.
@@ -15,9 +15,9 @@ def color565(r, g, b):
     """
     return (r & 0xf8) << 8 | (g & 0xfc) << 3 | b >> 3
 
+
 class Display(object):
     """Serial interface for 16-bit color (5-6-5 RGB) IL9341 display.
-
     Note:  All coordinates are zero based.
     """
 
@@ -90,7 +90,6 @@ class Display(object):
     def __init__(self, spi, cs, dc, rst,
                  width=480, height=320, rotation=0):
         """Initialize OLED.
-
         Args:
             spi (Class Spi):  SPI interface for OLED
             cs (Class Pin):  Chip select pin
@@ -159,7 +158,6 @@ class Display(object):
 
     def block(self, x0, y0, x1, y1, data):
         """Write a block of data to display.
-
         Args:
             x0 (int):  Starting X position.
             y0 (int):  Starting Y position.
@@ -183,7 +181,6 @@ class Display(object):
 
     def clear(self, color=0, hlines=8):
         """Clear display.
-
         Args:
             color (Optional int): RGB565 color value (Default: 0 = Black).
             hlines (Optional int): # of horizontal lines per chunk (Default: 8)
@@ -217,7 +214,6 @@ class Display(object):
 
     def draw_circle(self, x0, y0, r, color):
         """Draw a circle.
-
         Args:
             x0 (int): X coordinate of center point.
             y0 (int): Y coordinate of center point.
@@ -252,7 +248,6 @@ class Display(object):
 
     def draw_ellipse(self, x0, y0, a, b, color):
         """Draw an ellipse.
-
         Args:
             x0, y0 (int): Coordinates of center point.
             a (int): Semi axis horizontal.
@@ -311,7 +306,6 @@ class Display(object):
 
     def draw_hline(self, x, y, w, color):
         """Draw a horizontal line.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -325,7 +319,6 @@ class Display(object):
 
     def draw_image(self, path, x=0, y=0, w=320, h=240):
         """Draw image from flash.
-
         Args:
             path (string): Image file path.
             x (int): X coordinate of image left.  Default is 0.
@@ -358,7 +351,6 @@ class Display(object):
     def draw_letter(self, x, y, letter, font, color, background=0,
                     landscape=False, rotate_180=False):
         """Draw a letter.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -405,7 +397,6 @@ class Display(object):
 
     def draw_line(self, x1, y1, x2, y2, color):
         """Draw a line using Bresenham's algorithm.
-
         Args:
             x1, y1 (int): Starting coordinates of the line
             x2, y2 (int): Ending coordinates of the line
@@ -460,7 +451,6 @@ class Display(object):
 
     def draw_lines(self, coords, color):
         """Draw multiple lines.
-
         Args:
             coords ([[int, int],...]): Line coordinate X, Y pairs
             color (int): RGB565 color value.
@@ -475,7 +465,6 @@ class Display(object):
 
     def draw_pixel(self, x, y, color):
         """Draw a single pixel.
-
         Args:
             x (int): X position.
             y (int): Y position.
@@ -487,7 +476,6 @@ class Display(object):
 
     def draw_polygon(self, sides, x0, y0, r, color, rotate=0):
         """Draw an n-sided regular polygon.
-
         Args:
             sides (int): Number of polygon sides.
             x0, y0 (int): Coordinates of center point.
@@ -511,7 +499,6 @@ class Display(object):
 
     def draw_rectangle(self, x, y, w, h, color):
         """Draw a rectangle.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -528,7 +515,6 @@ class Display(object):
 
     def draw_sprite(self, buf, x, y, w, h):
         """Draw a sprite (optimized for horizontal drawing).
-
         Args:
             buf (bytearray): Buffer to draw.
             x (int): Starting X position.
@@ -545,7 +531,6 @@ class Display(object):
     def draw_text(self, x, y, text, font, color,  background=0,
                   landscape=False, rotate_180=False, spacing=1):
         """Draw text.
-
         Args:
             x (int): Starting X position
             y (int): Starting Y position
@@ -588,7 +573,6 @@ class Display(object):
 
     def draw2_text8x8(self, x, y, text, color, background=0, rotate=0, scale=1):
         """Draw text using built-in MicroPython 8x8 bit font with scaling.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -668,7 +652,6 @@ class Display(object):
     def draw_text8x8(self, x, y, text, color,  background=0,
                      rotate=0):
         """Draw text using built-in MicroPython 8x8 bit font.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -723,7 +706,6 @@ class Display(object):
 
     def draw_vline(self, x, y, h, color):
         """Draw a vertical line.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -738,7 +720,6 @@ class Display(object):
 
     def fill_circle(self, x0, y0, r, color):
         """Draw a filled circle.
-
         Args:
             x0 (int): X coordinate of center point.
             y0 (int): Y coordinate of center point.
@@ -766,7 +747,6 @@ class Display(object):
 
     def fill_ellipse(self, x0, y0, a, b, color):
         """Draw a filled ellipse.
-
         Args:
             x0, y0 (int): Coordinates of center point.
             a (int): Semi axis horizontal.
@@ -818,7 +798,6 @@ class Display(object):
 
     def fill_hrect(self, x, y, w, h, color):
         """Draw a filled rectangle (optimized for horizontal drawing).
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -848,7 +827,6 @@ class Display(object):
 
     def fill_rectangle(self, x, y, w, h, color):
         """Draw a filled rectangle.
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -865,7 +843,6 @@ class Display(object):
 
     def fill_polygon(self, sides, x0, y0, r, color, rotate=0):
         """Draw a filled n-sided regular polygon.
-
         Args:
             sides (int): Number of polygon sides.
             x0, y0 (int): Coordinates of center point.
@@ -947,7 +924,6 @@ class Display(object):
 
     def fill_vrect(self, x, y, w, h, color):
         """Draw a filled rectangle (optimized for vertical drawing).
-
         Args:
             x (int): Starting X position.
             y (int): Starting Y position.
@@ -977,7 +953,6 @@ class Display(object):
 
     def is_off_grid(self, xmin, ymin, xmax, ymax):
         """Check if coordinates extend past display boundaries.
-
         Args:
             xmin (int): Minimum horizontal pixel.
             ymin (int): Minimum vertical pixel.
@@ -1004,7 +979,6 @@ class Display(object):
 
     def load_sprite(self, path, w, h):
         """Load sprite image.
-
         Args:
             path (string): Image file path.
             w (int): Width of image.
@@ -1018,7 +992,6 @@ class Display(object):
 
     def reset_cpy(self):
         """Perform reset: Low=initialization, High=normal operation.
-
         Notes: CircuitPython implemntation
         """
         self.rst.value = False
@@ -1028,7 +1001,6 @@ class Display(object):
 
     def reset_mpy(self):
         """Perform reset: Low=initialization, High=normal operation.
-
         Notes: MicroPython implemntation
         """
         self.rst(0)
@@ -1038,7 +1010,6 @@ class Display(object):
 
     def scroll(self, y):
         """Scroll display vertically.
-
         Args:
             y (int): Number of pixels to scroll display.
         """
@@ -1064,7 +1035,6 @@ class Display(object):
 
     def sleep(self, enable=True):
         """Enters or exits sleep mode.
-
         Args:
             enable (bool): True (default)=Enter sleep mode, False=Exit sleep
         """
@@ -1075,7 +1045,6 @@ class Display(object):
 
     def write_cmd_mpy(self, command, *args):
         """Write command to OLED (MicroPython).
-
         Args:
             command (byte): ILI9341 command code.
             *args (optional bytes): Data to transmit.
@@ -1090,7 +1059,6 @@ class Display(object):
 
     def write_cmd_cpy(self, command, *args):
         """Write command to OLED (CircuitPython).
-
         Args:
             command (byte): ILI9341 command code.
             *args (optional bytes): Data to transmit.
@@ -1109,7 +1077,6 @@ class Display(object):
 
     def write_data_mpy(self, data):
         """Write data to OLED (MicroPython).
-
         Args:
             data (bytes): Data to transmit.
         """
@@ -1120,7 +1087,6 @@ class Display(object):
 
     def write_data_cpy(self, data):
         """Write data to OLED (CircuitPython).
-
         Args:
             data (bytes): Data to transmit.
         """
@@ -1133,33 +1099,68 @@ class Display(object):
         self.spi.unlock()
         self.cs.value = True
         
+def flash_led(led_color):
+    """Flash the LED multiple times."""
+    for _ in range(5):  # Flash 5 times
+        # led_pin.on()
+        led_color.on()
+        sleep(0.5)
+        # led_pin.off()
+        led_color.off()
+        sleep(0.5)
 
+timer = Timer()
+led_pin = machine.Pin(25, machine.Pin.OUT)
+yellow_led = machine.Pin(2, machine.Pin.OUT)
+green_led = machine.Pin(3, machine.Pin.OUT)
+button_1 = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_UP)
+button_2 = machine.Pin(1, machine.Pin.IN, machine.Pin.PULL_UP)
 spi = SPI(1, baudrate=40000000, sck=Pin(14), mosi=Pin(15))
 display = Display(spi, dc=Pin(6), cs=Pin(17), rst=Pin(7))
 display.clear()
 
+def blink(timer):
+    yellow_led.toggle()
+
 def main():
     while True:
-        display.clear(color565(255, 255, 255))
-        #display.draw_text(100, 100, "Test", XglcdFont, color565(0,255,0), background=255, landscape=True, rotate_180=False, spacing=1)
-        display.draw_text8x8(120, 125, "DeskGenie", color565(255,0,0),  background=color565(255,255,255), rotate=90)
-        display.draw_text8x8(100, 100, "Select an Option:", color565(255,0,0),  background=color565(255,255,255), rotate=90)
-        display.draw_text8x8(80, 60, "1: Flashcards", color565(255,0,0),  background=color565(255,255,255), rotate=90)
-        display.draw_text8x8(80, 180, "2: Pomodoro", color565(255,0,0),  background=color565(255,255,255), rotate=90)
-        print("Select an option:")
-        print("1: Flashcards")
-        print("2: Study Techniques")
-        choice = input("Enter your choice: ")
+        choice = 0;
+        #timer.init(freq=2.5, mode=Timer.PERIODIC, callback=blink)
+        if choice != "1" or choice != "2":
+            display.clear(color565(255, 255, 255))
+            #display.draw_text(100, 100, "Test", XglcdFont, color565(0,255,0), background=255, landscape=True, rotate_180=False, spacing=1)
+            display.draw_text8x8(120, 125, "DeskGenie", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            display.draw_text8x8(100, 100, "Select an Option:", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            display.draw_text8x8(80, 60, "1: Flashcards", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            display.draw_text8x8(80, 180, "2: Pomodoro", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            print("Select an option:")
+            print("1: Flashcards")
+            print("2: Study Techniques")
+            choice = input("Enter your choice: ")
+        if button_1.value() == 1:  # Button 1 pressed
+            print("Flashcards selected: Flashing LED.")
+            choice = 1;
+            sleep(1)
+            
+        if button_2.value() == 1:  # Button 1 pressed
+            print("Flashcards selected: Flashing LED.")
+            choice = 2;
+            sleep(1)
         
         if choice == "1":
-            print("Flashcards selected: Flashing LED.")
-            flash_led()
+            print("Flashcards selected")
+            display.clear(color565(255, 255, 255))
+            display.draw_text8x8(120, 125, "Flashcards", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            display.draw_text8x8(100, 100, "Left Button to Reveal", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            display.draw_text8x8(75, 98, "Right Button to Change", color565(255,0,0),  background=color565(255,255,255), rotate=90)
+            flash_led(green_led)
+            sleep(3)
         elif choice == "2":
-            print("Study Techniques selected: Turning LED on.")
-            turn_on_led()
+            print("Study Techniques selected")
+            flash_led(yellow_led)
+            sleep(3)            
         else:
             print("Invalid choice. Try again.")
-            led_pin.off()  # Turn LED off for invalid input
 
 if __name__ == "__main__":
     main()
